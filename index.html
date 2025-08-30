@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>LostResolve</title>
+  <style>
+    :root { --bg:#f8f9fa; --card:#fff; --primary:#007bff; --muted:#666; }
+    body { font-family: Arial, Helvetica, sans-serif; background:var(--bg); margin:0; padding:20px; }
+    .center { max-width:960px; margin:20px auto; }
+    .card { background:var(--card); padding:18px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+    h1 { text-align:center; color:#333; margin:8px 0 18px; }
+    .row { display:flex; gap:12px; }
+    input, select, textarea, button { width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; }
+    textarea { min-height:100px; resize:vertical; }
+    .small { width:240px; }
+    .nav { display:flex; gap:8px; justify-content:center; margin-bottom:14px; }
+    .nav button { padding:8px 12px; border-radius:6px; border:none; background:#e9ecef; cursor:pointer; font-weight:600; }
+    .nav .active { background:var(--primary); color:white; }
+    .muted { color:var(--muted); font-size:13px; margin-top:6px; }
+    .hidden { display:none; }
+    .actions { display:flex; gap:10px; justify-content:center; margin-top:12px; }
+    .btn-primary { background:var(--primary); color:white; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
+    .btn-danger { background:#ff4757; color:white; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
+    .link { color:var(--primary); cursor:pointer; text-decoration:underline; background:none; border:none; padding:0; font-size:14px; }
+    label { font-weight:600; margin-top:8px; display:block; }
+    .match-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 15px;
+  margin: 12px 0;
+  transition: transform 0.2s;
+}
+.match-card:hover {
+  transform: scale(1.02);
+}
+.match-card h3 {
+  margin: 0 0 6px;
+  color: var(--primary);
+}
+.match-card p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #333;
+}
+.match-card button {
+  margin-right: 8px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+.match-card button:first-of-type {
+  background: #28a745;
+  color: #fff;
+}
+.match-card button:last-of-type {
+  background: #dc3545;
+  color: #fff;
+}
+
+  </style>
+</head>
+<body>
+  <div class="center">
+    <h1>LostResolve</h1>
+
+    <!-- LOGIN -->
+    <div id="page-login" class="card">
+      <h2 style="margin:0 0 8px;">Login</h2>
+      <label>Email</label>
+      <input id="login-email" type="email" placeholder="you@college.edu">
+      <label>Password</label>
+      <input id="login-pass" type="password" placeholder="Password">
+      <div class="actions">
+        <button class="btn-primary" onclick="doLogin()">Login</button>
+        <button class="link" onclick="showPage('register')">Register</button>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="page-register" class="card hidden">
+      <h2 style="margin:0 0 8px;">Register</h2>
+      <label>Name</label>
+      <input id="reg-name" placeholder="Full Name">
+      <label>Institute</label>
+      <input id="reg-institute" placeholder="Institute">
+      <label>Email</label>
+      <input id="reg-email" type="email" placeholder="you@college.edu">
+      <label>Contact</label>
+      <input id="reg-contact" placeholder="Phone / WhatsApp">
+      <label>Password</label>
+      <input id="reg-pass" type="password" placeholder="Password">
+      <label>Confirm Password</label>
+      <input id="reg-conf" type="password" placeholder="Confirm Password">
+      <div class="actions">
+        <button class="btn-primary" onclick="doRegister()">Create account</button>
+        <button class="link" onclick="showPage('login')">Back to login</button>
+      </div>
+    </div>
+
+    <!-- HOME -->
+    <div id="page-home" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <h2 id="home-welcome" style="margin:0;">Welcome!</h2>
+          <div id="home-email" class="muted"></div>
+        </div>
+        <div>
+          <button class="btn-danger" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div class="row" style="margin-top:12px;">
+          <button class="btn-primary" onclick="showPage('lost')">Report Lost Item</button>
+          <button class="btn-primary" onclick="showPage('found')">Report Found Item</button>
+          <button class="btn-primary" onclick="showPage('matches')">Matches</button>
+        </div>
+        <div class="muted" style="text-align:center;margin-top:12px;">Use clear descriptions and an image (optional) to increase chances of recovery.</div>
+      </div>
+    </div>
+
+    <!-- LOST FORM -->
+    <div id="page-lost" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 style="margin:0;">Report Lost Item</h2>
+        <div>
+          <button class="link" onclick="showPage('home')">Back</button>
+          <button class="btn-danger" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <label>Your Name</label>
+      <input id="lost-name" class="small" placeholder="Your name">
+      <label>Your Email</label>
+      <input id="lost-email" class="small" placeholder="you@college.edu">
+      <label>Contact</label>
+      <input id="lost-contact" class="small" placeholder="Phone">
+      <label>Category</label>
+      <select id="lost-category">
+        <option value="">Select category</option>
+        <option>Electronics</option><option>Accessories</option><option>ID Cards</option><option>Books</option><option>Clothing</option><option>Other</option>
+      </select>
+      <label>Item Name</label>
+      <input id="lost-item" placeholder="e.g., Black Wallet">
+      <label>Description</label>
+      <textarea id="lost-desc" placeholder="Where/when lost, unique features..."></textarea>
+      <label>Image (optional)</label>
+      <input type="file" id="lost-image" accept="image/*">
+      <div class="actions">
+        <button class="btn-primary" onclick="submitLost()">Submit Lost Report</button>
+        <button class="link" onclick="showPage('home')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- FOUND FORM -->
+    <div id="page-found" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 style="margin:0;">Report Found Item</h2>
+        <div>
+          <button class="link" onclick="showPage('home')">Back</button>
+          <button class="btn-danger" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <label>Your Name</label>
+      <input id="found-name" class="small" placeholder="Your name">
+      <label>Your Email</label>
+      <input id="found-email" class="small" placeholder="you@college.edu">
+      <label>Contact</label>
+      <input id="found-contact" class="small" placeholder="Phone">
+      <label>Category</label>
+      <select id="found-category">
+        <option value="">Select category</option>
+        <option>Electronics</option><option>Accessories</option><option>ID Cards</option><option>Books</option><option>Clothing</option><option>Other</option>
+      </select>
+      <label>Item Name</label>
+      <input id="found-item" placeholder="e.g., Blue Backpack">
+      <label>Description</label>
+      <textarea id="found-desc" placeholder="Where found, unique features..."></textarea>
+      <label>Image</label>
+      <input type="file" id="found-image" accept="image/*">
+      <div class="actions">
+        <button class="btn-primary" onclick="submitFound()">Submit Found Report</button>
+        <button class="link" onclick="showPage('home')">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Matches --> 
+  <div id="page-matches" class="card hidden">
+    <h2> Possible Matches</h2>
+    <button onclick="showPage('home')" class="btn-secondary">⬅ Back</button>
+    <div id="matchResults"></div>
+  </div>
+
+  <div id="undoBar" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:#333;color:#fff;padding:10px 20px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.2);z-index:1000;">
+    <span id="undoMsg">Match removed.</span>
+    <button onclick="undoLastNotMine()" style="margin-left:10px;background:#007bff;color:white;border:none;
+    padding:6px 12px;border-radius:6px;cursor:pointer;">⤴ Undo</button>
+  </div>
+
+</div>
+<script>
+  // MATCHES
+  async function loadMatches(email) {
+  google.script.run.withSuccessHandler(displayMatches).getMatches(email);
+}
+
+function displayMatches(matches) {
+  let container = document.getElementById("matchResults");
+  container.innerHTML = "";
+
+  if (matches.length === 0) {
+    container.innerHTML = "<p>No matches found yet.</p>";
+    return;
+  }
+
+  matches.forEach(m => {
+    let card = document.createElement("div");
+    card.className = "match-card";
+    card.innerHTML = `
+      <h3>${m.item}</h3>
+      <p>${m.description}</p>
+      ${m.image ? `<p><a href="${m.image}" target="_blank">View Image</a></p>` : `<p>No image</p>`}
+      <div>
+        <button onclick="showContact('${m.finderEmail}','${m.finderContact}','${m.foundRow}','${m.lostRow}', this)">✅ It's Mine</button>
+        <button onclick="removeMatch(this, '${m.lostRow}', '${m.foundRow}')">❌ Not Mine</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+
+let lastRemoved = null;
+
+function removeMatch(btn, lostRow, foundRow) {
+  let card = btn.closest(".match-card");
+
+  if (card) {
+    // Remove instantly
+    card.remove();
+  }
+
+  // Save state locally for Undo
+  lastRemoved = { email: getLoggedUser().email, lostRow, foundRow, cardHTML: card.outerHTML };
+
+  // Fire backend call in background (non-blocking)
+  google.script.run.markNotMine(lastRemoved.email, lostRow, foundRow);
+
+  // Show Undo bar instantly
+  document.getElementById("undoBar").style.display = "block";
+
+  // Auto-hide after 5s if not undone
+  setTimeout(() => {
+    if (document.getElementById("undoBar").style.display === "block") {
+      document.getElementById("undoBar").style.display = "none";
+      lastRemoved = null;
+    }
+  }, 10000);
+}
+
+function undoLastNotMine() {
+  if (!lastRemoved) return;
+
+  // Restore instantly in frontend
+  let container = document.getElementById("matchResults");
+  let temp = document.createElement("div");
+  temp.innerHTML = lastRemoved.cardHTML;
+  container.prepend(temp.firstElementChild);
+
+  // Call backend to remove rejection
+  google.script.run.undoNotMine(lastRemoved.email, lastRemoved.lostRow, lastRemoved.foundRow);
+
+  // Hide Undo bar
+  document.getElementById("undoBar").style.display = "none";
+  lastRemoved = null;
+}
+
+
+function showContact(email, contact, foundRow, lostRow, btn) {
+  let parent = btn.parentElement;
+  let card = parent.parentElement; // get the whole match card
+
+  // Store the original card HTML so we can restore later
+  card.setAttribute("data-original", card.innerHTML);
+
+  card.innerHTML = `
+    <p><b>Finder Email:</b> ${email}</p>
+    <p><b>Finder Contact:</b> ${contact}</p>
+    <p>You should contact this user to get your lost object.</p>
+    <button onclick="confirmClaim('${foundRow}','${lostRow}', this)">✅ Confirm</button>
+    <button onclick="cancelContact(this)">❌ Cancel</button>
+  `;
+}
+
+function cancelContact(btn) {
+  let card = btn.closest(".match-card");
+  let original = card.getAttribute("data-original");
+  if (original) {
+    card.innerHTML = original; // restore original match card
+  }
+}
+
+
+function confirmClaim(foundRow, lostRow, btn) {
+  // Change button state
+  btn.disabled = true;
+  btn.textContent = "Confirming...";
+
+  google.script.run
+    .withSuccessHandler(() => {
+      btn.textContent = "Confirmed"; // permanent change
+      btn.disabled = true;
+
+      // Optionally: fade out the card after a short delay
+      setTimeout(() => {
+        loadMatches(getLoggedUser().email);
+      }, 1000);
+    })
+    .withFailureHandler(err => {
+      alert("Error: " + err.message);
+      btn.disabled = false;
+      btn.textContent = "✅ Confirm";
+    })
+    .confirmClaim(foundRow, lostRow);
+}
+
+
+/* ---------- Utilities ---------- */
+function showPage(page) {
+  const pages = ['login','register','home','lost','found','matches'];  // add matches
+  pages.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.classList.add('hidden');
+  });
+  document.getElementById('page-' + page).classList.remove('hidden');
+
+  // login guard
+  if ((page === 'home' || page === 'lost' || page === 'found' || page === 'matches') && !getLoggedUser()) {
+    alert('Please login first.');
+    showPage('login');
+    return;
+  }
+
+  if (page === 'home') fillHome();
+  if (page === 'lost') fillLostForm();
+  if (page === 'found') fillFoundForm();
+  if (page === 'matches') loadMatches(getLoggedUser().email); // load matches here
+}
+
+function setLoggedUser(obj) { localStorage.setItem('lr_user', JSON.stringify(obj)); }
+function getLoggedUser() { try { return JSON.parse(localStorage.getItem('lr_user')); } catch(e){ return null; } }
+function clearLoggedUser() { localStorage.removeItem('lr_user'); }
+
+/* ---------- Registration ---------- */
+function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const inst = document.getElementById('reg-institute').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const contact = document.getElementById('reg-contact').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  const conf = document.getElementById('reg-conf').value;
+  if (!name || !email || !contact || !pass) { alert('Please fill required fields.'); return; }
+  if (pass !== conf) { alert('Passwords do not match.'); return; }
+
+  google.script.run.withSuccessHandler(function(res){
+    alert(res.message || (res.success ? 'Registered' : 'Error'));
+    if (res.success) {
+      // clear form and go to login
+      document.getElementById('reg-name').value = '';
+      document.getElementById('reg-institute').value = '';
+      document.getElementById('reg-email').value = '';
+      document.getElementById('reg-contact').value = '';
+      document.getElementById('reg-pass').value = '';
+      document.getElementById('reg-conf').value = '';
+      showPage('login');
+    }
+  }).registerUser(name, inst, email, contact, pass);
+}
+
+/* ---------- Login ---------- */
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email || !pass) { alert('Enter email and password'); return; }
+  google.script.run.withSuccessHandler(function(res){
+    if (res && res.success) {
+      setLoggedUser({ name: res.name, email: res.email, contact: res.contact, institute: res.institute });
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-pass').value = '';
+      showPage('home');
+    } else {
+      alert(res.message || 'Login failed');
+    }
+  }).loginUser(email, pass);
+}
+
+/* ---------- Home ---------- */
+function fillHome() {
+  const u = getLoggedUser();
+  if (!u) return;
+  document.getElementById('home-welcome').innerText = 'Welcome, ' + (u.name || 'User') + '!';
+  document.getElementById('home-email').innerText = (u.email || '');
+}
+
+/* ---------- Logout ---------- */
+function logout() {
+  if (confirm('Logout?')) {
+    clearLoggedUser();
+    showPage('login');
+  }
+}
+
+/* ---------- Fill forms from logged user ---------- */
+function fillLostForm() {
+  const u = getLoggedUser() || {};
+  document.getElementById('lost-name').value = u.name || '';
+  document.getElementById('lost-email').value = u.email || '';
+  document.getElementById('lost-contact').value = u.contact || '';
+  document.getElementById('lost-category').value = '';
+  document.getElementById('lost-item').value = '';
+  document.getElementById('lost-desc').value = '';
+  document.getElementById('lost-image').value = '';
+}
+
+function fillFoundForm() {
+  const u = getLoggedUser() || {};
+  document.getElementById('found-name').value = u.name || '';
+  document.getElementById('found-email').value = u.email || '';
+  document.getElementById('found-contact').value = u.contact || '';
+  document.getElementById('found-category').value = '';
+  document.getElementById('found-item').value = '';
+  document.getElementById('found-desc').value = '';
+  document.getElementById('found-image').value = '';
+}
+
+/* ---------- File to base64 helper ---------- */
+function fileToBase64(file, cb) {
+  if (!file) { cb(''); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) { cb(e.target.result); };
+  reader.onerror = function(){ cb(''); };
+  reader.readAsDataURL(file);
+}
+
+/* ---------- Submit Lost ---------- */
+function submitLost() {
+  const btn = document.querySelector("#page-lost .btn-primary");
+  btn.disabled = true;
+  btn.textContent = "Submitting...";
+
+  const name = document.getElementById('lost-name').value.trim();
+  const email = document.getElementById('lost-email').value.trim();
+  const contact = document.getElementById('lost-contact').value.trim();
+  const category = document.getElementById('lost-category').value.trim();
+  const item = document.getElementById('lost-item').value.trim();
+  const desc = document.getElementById('lost-desc').value.trim();
+  const file = document.getElementById('lost-image').files[0];
+
+  if (!name || !email || !contact || !category || !item || !desc) {
+    alert('Please fill all required fields (name, email, contact, category, item, description).'); 
+    btn.disabled = false;
+    btn.textContent = "Submit Lost Report";
+    return;
+  }
+
+  fileToBase64(file, function(base64) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        alert(res.message || 'Saved');
+        btn.disabled = false;
+        btn.textContent = "Submit Lost Report";
+        showPage('home');
+      })
+      .withFailureHandler(function(err) {
+        alert("Error submitting lost report: " + err.message);
+        btn.disabled = false;
+        btn.textContent = "Submit Lost Report";
+      })
+      .saveLostItem(name, email, contact, category, item, desc, base64);
+  });
+}
+
+
+/* ---------- Submit Found ---------- */
+function submitFound() {
+  const btn = document.querySelector("#page-found .btn-primary");
+  btn.disabled = true;
+  btn.textContent = "Submitting...";
+
+  const name = document.getElementById('found-name').value.trim();
+  const email = document.getElementById('found-email').value.trim();
+  const contact = document.getElementById('found-contact').value.trim();
+  const category = document.getElementById('found-category').value.trim();
+  const item = document.getElementById('found-item').value.trim();
+  const desc = document.getElementById('found-desc').value.trim();
+  const file = document.getElementById('found-image').files[0];
+
+  if (!name || !email || !contact || !category || !item || !desc) {
+  alert('Please fill all required fields (name, email, contact, category, item, description).'); 
+  btn.disabled = false;
+  btn.textContent = "Submit Found Report";
+  return;
+  }
+
+  // Ensure image is mandatory for found reports
+  if (!file) {
+    alert('Please upload an image of the found item (mandatory).');
+    btn.disabled = false;
+    btn.textContent = "Submit Found Report";
+    return;
+  }
+
+  fileToBase64(file, function(base64) {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        alert(res.message || 'Saved');
+        btn.disabled = false;
+        btn.textContent = "Submit Found Report";
+        showPage('home');
+      })
+      .withFailureHandler(function(err) {
+        alert("Error submitting found report: " + err.message);
+        btn.disabled = false;
+        btn.textContent = "Submit Found Report";
+      })
+      .saveFoundItem(name, email, contact, category, item, desc, base64);
+  });
+}
+
+
+/* ---------- On load ---------- */
+(function init(){
+  const u = getLoggedUser();
+  if (u && u.email) showPage('home'); else showPage('login');
+})();
+</script>
+</body>
+</html>
+
